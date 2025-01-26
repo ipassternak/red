@@ -5,7 +5,7 @@ import {
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { AppException } from '@lib/utils/exception';
 
@@ -13,6 +13,7 @@ export interface AppExceptionPayload {
   statusCode: number;
   message: string | string[];
   errorCode?: string;
+  requestId?: string;
 }
 
 const DEFAULT_STATUS_CODE = 500;
@@ -24,6 +25,7 @@ export class AppFilter implements ExceptionFilter {
 
   catch(exception: Error, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
+    const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
 
     this.logger.error(exception);
@@ -38,11 +40,13 @@ export class AppFilter implements ExceptionFilter {
         : exception.message;
     const errorCode =
       exception instanceof AppException ? exception.errorCode : undefined;
+    const requestId = request.header('x-request-id');
 
     const payload: AppExceptionPayload = {
       statusCode,
       message,
       errorCode,
+      requestId,
     };
 
     response.status(statusCode).json(payload);

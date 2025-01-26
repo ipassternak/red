@@ -1,11 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export interface AppExceptionPayload {
-  statusCode: number;
-  message: string | string[];
-  errorCode?: string;
-}
-
 export class AppException extends HttpException {
   readonly name = 'AppException';
   readonly errorCode?: string;

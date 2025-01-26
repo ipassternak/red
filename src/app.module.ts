@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ClsModule, ClsService } from 'nestjs-cls';
 import { GracefulShutdownModule } from 'nestjs-graceful-shutdown';
 import { LoggerModule } from 'nestjs-pino';
 
@@ -14,13 +15,19 @@ import { HealthModule } from './health/health.module';
       isGlobal: true,
       load: [serverConfig],
     }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: {
+        mount: true,
+      },
+    }),
     LoggerModule.forRootAsync({
       useFactory: (configService: ConfigService<AppConfig, true>) => ({
         pinoHttp: {
           level: configService.get('server.logLevel', { infer: true }),
         },
       }),
-      inject: [ConfigService],
+      inject: [ConfigService, ClsService],
     }),
     GracefulShutdownModule.forRootAsync({
       useFactory: (configService: ConfigService<AppConfig, true>) => ({
