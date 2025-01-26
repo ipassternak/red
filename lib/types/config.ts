@@ -3,6 +3,11 @@ export interface ServerConfig {
   trustProxy: boolean;
   logLevel: string;
   shutdownTimeout: number;
+  cors: {
+    origin: string;
+    methods: string[];
+    credentials: boolean;
+  };
 }
 
 export interface AppConfig {

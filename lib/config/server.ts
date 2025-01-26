@@ -10,5 +10,18 @@ export default registerAs(
     trustProxy: env('SERVER_TRUST_PROXY', 'boolean', false),
     logLevel: env('SERVER_LOG_LEVEL', 'string', 'info'),
     shutdownTimeout: env('SERVER_SHUTDOWN_TIMEOUT', 'int', 5000),
+    cors: {
+      origin: env('SERVER_CORS_ORIGIN', 'string', '*'),
+      methods: env('SERVER_CORS_METHODS', 'set', [
+        'GET',
+        'HEAD',
+        'PUT',
+        'PATCH',
+        'POST',
+        'DELETE',
+        'OPTIONS',
+      ]),
+      credentials: env('SERVER_CORS_CREDENTIALS', 'boolean', true),
+    },
   }),
 );

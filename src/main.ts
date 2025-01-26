@@ -19,6 +19,7 @@ async function bootstrap(): Promise<void> {
   app.useLogger(logger);
   const config = app.get(ConfigService<AppConfig, true>);
   app.set('trust proxy', config.get('server.trustProxy', { infer: true }));
+  app.enableCors(config.get('server.cors', { infer: true }));
   await app.listen(config.get('server.port', { infer: true }));
 }
 

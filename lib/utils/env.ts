@@ -1,4 +1,4 @@
-type Cast = 'string' | 'number' | 'boolean' | 'int';
+type Cast = 'string' | 'number' | 'boolean' | 'int' | 'set';
 
 const CASTERS = {
   string: (value: string) => value,
@@ -15,6 +15,7 @@ const CASTERS = {
       throw new TypeError(`env ${key}=${value} cannot be cast to an integer`);
     return int;
   },
+  set: (value: string) => value.split(','),
 };
 
 type Caster<Type extends Cast> = (typeof CASTERS)[Type];
