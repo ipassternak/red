@@ -6,12 +6,14 @@ import { Logger } from 'nestjs-pino';
 
 import { AppConfig } from '@lib/types/config';
 
+import { AppFilter } from './app.filter';
 import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
+  app.useGlobalFilters(new AppFilter());
   setupGracefulShutdown({ app });
   const logger = app.get(Logger);
   app.useLogger(logger);

@@ -225,10 +225,6 @@ export default tseslint.config(
         'error',
         'always',
       ],
-      'operator-linebreak': [
-        'error',
-        'after',
-      ],
       'semi-spacing': [
         'error',
         {
