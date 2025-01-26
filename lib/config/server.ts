@@ -9,5 +9,6 @@ export default registerAs(
     port: env('PORT', 'int'),
     trustProxy: env('SERVER_TRUST_PROXY', 'boolean', false),
     logLevel: env('SERVER_LOG_LEVEL', 'string', 'info'),
+    shutdownTimeout: env('SERVER_SHUTDOWN_TIMEOUT', 'int', 5000),
   }),
 );
