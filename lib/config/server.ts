@@ -8,5 +8,6 @@ export default registerAs(
   (): ServerConfig => ({
     port: env('PORT', 'int'),
     trustProxy: env('SERVER_TRUST_PROXY', 'boolean', false),
+    logLevel: env('SERVER_LOG_LEVEL', 'string', 'info'),
   }),
 );
