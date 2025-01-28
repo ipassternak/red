@@ -23,5 +23,12 @@ export default registerAs(
       ]),
       credentials: env('SERVER_CORS_CREDENTIALS', 'boolean', true),
     },
+    swagger: {
+      enable: env('SERVER_SWAGGER_ENABLE', 'boolean', false),
+      title: env('SERVER_SWAGGER_TITLE', 'string', 'Documentation'),
+      description: env('SERVER_SWAGGER_DESCRIPTION', 'string', ''),
+      version: env('SERVER_SWAGGER_VERSION', 'string', '1.0'),
+      path: env('SERVER_SWAGGER_PATH', 'string', 'docs'),
+    },
   }),
 );

@@ -8,6 +8,13 @@ export interface ServerConfig {
     methods: string[];
     credentials: boolean;
   };
+  swagger: {
+    enable: boolean;
+    title: string;
+    description: string;
+    version: string;
+    path: string;
+  };
 }
 
 export interface AppConfig {
