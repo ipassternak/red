@@ -5,15 +5,17 @@ import { setupGracefulShutdown } from 'nestjs-graceful-shutdown';
 import { Logger } from 'nestjs-pino';
 
 import { AppConfig } from '@lib/types/config';
+import { AppValidationPipe } from '@lib/utils/exception';
 
-import { AppFilter } from './app.filter';
+import { AppExceptionFilter } from './app.exception-filter';
 import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
-  app.useGlobalFilters(new AppFilter());
+  app.useGlobalFilters(new AppExceptionFilter());
+  app.useGlobalPipes(new AppValidationPipe());
   setupGracefulShutdown({ app });
   const logger = app.get(Logger);
   app.useLogger(logger);

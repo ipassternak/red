@@ -44,6 +44,7 @@ export default tseslint.config(
           allowWithDecorator: true,
         },
       ],
+      '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/require-await': [
         'off',
       ],
@@ -110,10 +111,6 @@ export default tseslint.config(
           maxEOF: 0,
           maxBOF: 0,
         },
-      ],
-      indent: [
-        'error',
-        2,
       ],
       'linebreak-style': [
         'error',
