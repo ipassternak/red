@@ -1,0 +1,25 @@
+name: test
+
+on:
+  push:
+    branches: 
+      - '**'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+    - uses: actions/checkout@v4
+    - name: use node ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+    - run: npm run lint
