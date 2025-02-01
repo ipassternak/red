@@ -45,5 +45,6 @@ jobs:
         name: ${{ vars.STACK }}
         host: ${{ vars.HOST }}
         user: deploy
+        file: docker-compose.yml
         ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
         env_file: ./env
