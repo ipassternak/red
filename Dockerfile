@@ -14,4 +14,4 @@ COPY --from=build /tmp/node_modules/ ./node_modules/
 COPY --from=build /tmp/dist/ ./dist/
 COPY --from=build /tmp/package.json ./package.json
 USER node
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/src/main.js"]
