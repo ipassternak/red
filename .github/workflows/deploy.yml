@@ -27,3 +27,23 @@ jobs:
         tags: |
           ghcr.io/ipassternak/red:latest
           ghcr.io/ipassternak/red:${{ github.sha }}
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - push
+    steps:
+    - uses: actions/checkout@v2
+    - name: create deploy env file
+      run: |
+        echo "COMMIT_SHA=${{ github.sha }}" >> ./env
+        echo "HOST=${{ vars.HOST }}" >> ./env
+        echo "LETSENCRYPT_EMAIL=${{ vars.LETSENCRYPT_EMAIL }}" >> ./env
+    - name: deploy stack
+      uses: cssnr/stack-deploy-action@v1
+      with:
+        name: ${{ vars.STACK }}
+        host: ${{ vars.HOST }}
+        user: deploy
+        ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        env_file: ./env
