@@ -34,15 +34,23 @@ jobs:
       - push
     steps:
     - uses: actions/checkout@v2
-    - name: set up ssh key
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
     - name: deploy stack
       run: |
-        chmod +x .github/scripts/deploy.sh
-        .github/scripts/deploy.sh \
-          "${{ github.sha }}" \
-          "${{ vars.HOST }}" \
-          "${{ vars.STACK }}"
+        set +x
+        echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' >~/.ssh/id_ed25519
+        set -x
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H "${{ vars.HOST }}" >>~/.ssh/known_hosts
+        tee -a ~/.ssh/config << END
+        Host manager
+            HostName ${{ vars.HOST }}
+            User deploy
+            StrictHostKeyChecking no
+        END
+        rsync -ra "docker-compose.yml" "manager:~/docker-compose.yml"
+        ssh manager bash <<EOF
+            COMMIT_SHA=${{ github.sha }} \
+            HOST=${{ vars.HOST }} \
+            STACK=${{ vars.STACK }} \
+            docker stack deploy -c docker-compose.yml --prune --with-registry-auth ${{ vars.STACK }}
+        EOF
