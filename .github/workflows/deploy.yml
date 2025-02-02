@@ -34,17 +34,5 @@ jobs:
       - push
     steps:
     - uses: actions/checkout@v2
-    - name: create deploy env file
-      run: |
-        echo "COMMIT_SHA=${{ github.sha }}" >> ./env
-        echo "HOST=${{ vars.HOST }}" >> ./env
-        echo "STACK=${{ vars.STACK }}" >> ./env
     - name: deploy stack
-      uses: cssnr/stack-deploy-action@v1
-      with:
-        name: ${{ vars.STACK }}
-        host: ${{ vars.HOST }}
-        user: deploy
-        file: docker-compose.yml
-        ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-        env_file: ./env
+      run: .github/scripts/deploy.sh
