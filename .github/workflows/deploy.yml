@@ -45,7 +45,7 @@ jobs:
         tee -a ~/.ssh/config << END
         Host manager
             HostName ${{ vars.HOST }}
-            User deploy
+            User deployer
             StrictHostKeyChecking no
         END
         rsync -ra "docker-compose.yml" "manager:~/docker-compose.yml"
