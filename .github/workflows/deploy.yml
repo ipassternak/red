@@ -37,6 +37,7 @@ jobs:
     - name: deploy stack
       run: |
         set +x
+        mkdir -p ~/.ssh
         echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' >~/.ssh/id_ed25519
         set -x
         chmod 600 ~/.ssh/id_ed25519
