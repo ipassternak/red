@@ -1,5 +1,9 @@
 #!/bin/bash
 
+COMMIT_SHA="$1"
+HOST="$2"
+STACK="$3"
+
 set +x
 echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' >~/.ssh/id_ed25519
 set -x

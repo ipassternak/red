@@ -34,5 +34,15 @@ jobs:
       - push
     steps:
     - uses: actions/checkout@v2
+    - name: set up ssh key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
     - name: deploy stack
-      run: .github/scripts/deploy.sh
+      run: |
+        chmod +x .github/scripts/deploy.sh
+        .github/scripts/deploy.sh \
+          "${{ github.sha }}" \
+          "${{ vars.HOST }}" \
+          "${{ vars.STACK }}"
