@@ -38,7 +38,7 @@ jobs:
       run: |
         echo "COMMIT_SHA=${{ github.sha }}" >> ./env
         echo "HOST=${{ vars.HOST }}" >> ./env
-        echo "LETSENCRYPT_EMAIL=${{ vars.LETSENCRYPT_EMAIL }}" >> ./env
+        echo "STACK=${{ vars.STACK }}" >> ./env
     - name: deploy stack
       uses: cssnr/stack-deploy-action@v1
       with:

@@ -7,7 +7,6 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entryPoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
@@ -38,6 +37,9 @@ services:
       - "traefik.http.middlewares.ratelimit.rateLimit.burst=10"
     environment:
       - PORT=8080
+    configs:
+      - source: app-config
+        target: /app/config.json
     deploy:
       replicas: 3
       restart_policy:
@@ -49,3 +51,8 @@ services:
 
 volumes:
   letsencrypt:
+
+configs:
+  app-config:
+    external: true
+    name: ${STACK}_app-config

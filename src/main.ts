@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { setupGracefulShutdown } from 'nestjs-graceful-shutdown';
 import { Logger } from 'nestjs-pino';
 
-import { AppConfig } from '@lib/types/config';
+import { AppConfigDto } from '@config/app.dto';
 import { AppValidationPipe } from '@lib/utils/exception';
 
 import { AppExceptionFilter } from './app.exception-filter';
@@ -20,12 +20,12 @@ async function bootstrap(): Promise<void> {
   setupGracefulShutdown({ app });
   const logger = app.get(Logger);
   app.useLogger(logger);
-  const config = app.get(ConfigService<AppConfig, true>);
+  const config = app.get(ConfigService<AppConfigDto, true>);
   app.set('trust proxy', config.get('server.trustProxy', { infer: true }));
   app.enableCors(config.get('server.cors', { infer: true }));
   const swaggerConfig = config.get('server.swagger', { infer: true });
   const port = config.get('server.port', { infer: true });
-  if (swaggerConfig.enable) {
+  if (swaggerConfig.enabled) {
     const options = new DocumentBuilder()
       .addBearerAuth()
       .setTitle(swaggerConfig.title)
@@ -41,7 +41,7 @@ async function bootstrap(): Promise<void> {
     });
   }
   await app.listen(port);
-  if (swaggerConfig.enable)
+  if (swaggerConfig.enabled)
     logger.log(
       `Swagger UI available at http://localhost:${port}${swaggerConfig.path}`,
     );

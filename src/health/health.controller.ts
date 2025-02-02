@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckResult,
@@ -10,7 +11,8 @@ export class HealthController {
   constructor(private health: HealthCheckService) {}
 
   @Get()
-  @HealthCheck()
+  @ApiExcludeEndpoint()
+  @HealthCheck({ swaggerDocumentation: false })
   async check(): Promise<HealthCheckResult> {
     return await this.health.check([]);
   }

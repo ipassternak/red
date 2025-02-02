@@ -1,0 +1,20 @@
+{
+  "server": {
+    "port": "${PORT:-8080}",
+    "trustProxy": false,
+    "logLevel": "info",
+    "shutdownTimeout": 5000,
+    "cors": {
+      "origin": "*",
+      "methods": ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+      "credentials": true
+    },
+    "swagger": {
+      "enabled": false,
+      "title": "Swagger UI",
+      "description": "",
+      "version": "1.0",
+      "path": "/docs"
+    }
+  }
+}
