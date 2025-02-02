@@ -44,6 +44,6 @@ jobs:
       with:
         name: ${{ vars.STACK }}
         host: ${{ vars.HOST }}
-        user: deploy
+        user: deployer
         ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
         env_file: ./env
