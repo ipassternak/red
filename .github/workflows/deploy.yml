@@ -34,24 +34,16 @@ jobs:
       - push
     steps:
     - uses: actions/checkout@v2
-    - name: deploy stack
+    - name: create deploy env file
       run: |
-        set +x
-        mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" | tr -d '\r' >~/.ssh/id_ed25519
-        set -x
-        chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan -H "${{ vars.HOST }}" >>~/.ssh/known_hosts
-        tee -a ~/.ssh/config << END
-        Host manager
-            HostName ${{ vars.HOST }}
-            User deployer
-            StrictHostKeyChecking no
-        END
-        rsync -ra "docker-compose.yml" "manager:~/docker-compose.yml"
-        ssh manager bash <<EOF
-            COMMIT_SHA=${{ github.sha }} \
-            HOST=${{ vars.HOST }} \
-            STACK=${{ vars.STACK }} \
-            docker stack deploy -c docker-compose.yml --prune --with-registry-auth ${{ vars.STACK }}
-        EOF
+        echo "COMMIT_SHA=${{ github.sha }}" >> ./env
+        echo "HOST=${{ vars.HOST }}" >> ./env
+        echo "STACK=${{ vars.STACK }}" >> ./env
+    - name: deploy stack
+      uses: cssnr/stack-deploy-action@v1
+      with:
+        name: ${{ vars.STACK }}
+        host: ${{ vars.HOST }}
+        user: deploy
+        ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        env_file: ./env
