@@ -55,4 +55,4 @@ volumes:
 configs:
   app-config:
     external: true
-    name: ${STACK}_app-config
+    name: ${STACK}_app-config-${CONFIG_VERSION:-latest}

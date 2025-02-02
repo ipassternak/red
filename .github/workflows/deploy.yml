@@ -39,6 +39,7 @@ jobs:
         echo "COMMIT_SHA=${{ github.sha }}" >> ./env
         echo "HOST=${{ vars.HOST }}" >> ./env
         echo "STACK=${{ vars.STACK }}" >> ./env
+        echo "CONFIG_VERSION=${{ vars.CONFIG_VERSION }}" >> ./env
     - name: deploy stack
       uses: cssnr/stack-deploy-action@v1
       with:
