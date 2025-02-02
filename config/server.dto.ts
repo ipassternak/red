@@ -16,7 +16,7 @@ export class CorsConfigDto {
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
-  origins: string[] = ['*'];
+  origin: string[] = ['*'];
 
   @IsOptional()
   @IsArray()
