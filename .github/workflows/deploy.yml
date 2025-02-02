@@ -46,4 +46,5 @@ jobs:
         host: ${{ vars.HOST }}
         user: dep
         ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+        file: docker-compose.yml
         env_file: ./env
