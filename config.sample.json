@@ -16,5 +16,11 @@
       "version": "1.0",
       "path": "/docs"
     }
+  },
+  "auth": {
+    "jwt": {
+      "secret": "MINIMUM_THIRTY_TWO_SYMBOLIC_SECRET",
+      "expiresIn": "5m"
+    }
   }
 }

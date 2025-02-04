@@ -18,7 +18,7 @@
     "strictBindCallApply": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["src/*"],
+      "@src/*": ["src/*"],
       "@lib/*": ["lib/*"],
       "@config/*": ["config/*"]
     }
