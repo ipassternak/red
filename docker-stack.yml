@@ -54,8 +54,7 @@ services:
       timeout: 10s
       retries: 3
     depends_on:
-      postgres:
-        condition: service_started
+      - postgres
 
   postgres:
     image: postgres:17.2
