@@ -3,6 +3,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNotEmptyObject,
+  IsNumber,
   IsOptional,
   IsString,
   Length,
@@ -67,7 +68,7 @@ export class AuthConfigDto {
   oauth: OAuthConfigDto = new OAuthConfigDto();
 
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   @Min(1)
-  activeSessionsLimit = Infinity;
+  activeSessionsLimit?: number;
 }

@@ -147,7 +147,7 @@ export class AuthService {
     const limit = this.configService.get('auth.activeSessionsLimit', {
       infer: true,
     });
-    if (!isFinite(limit)) return true;
+    if (limit === undefined) return true;
     const activeSessionsCount = await this.sessionRepository.count({
       where: {
         sub: user.id,
