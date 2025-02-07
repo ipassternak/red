@@ -50,3 +50,14 @@ jobs:
         ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
         file: docker-stack.yml
         env_file: ./env
+
+  migrate:
+    runs-on: ubuntu-latest
+    needs: 
+      - deploy
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4'
+    - run: npx prisma migrate deploy
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
