@@ -1,64 +1,46 @@
 services:
-
-  reverse-proxy:
-    image: traefik:v3.1
-    command:
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entryPoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-    ports:
-      - mode: host
-        protocol: tcp
-        published: 80
-        target: 80
-      - mode: host
-        protocol: tcp
-        published: 443
-        target: 443
+  npm:
+    build:
+      dockerfile_inline: |
+        FROM node:20-alpine
+        VOLUME /app
+        WORKDIR /app
+        USER node
+    container_name: red_npm
     volumes:
-      - letsencrypt:/letsencrypt
-      - /var/run/docker.sock:/var/run/docker.sock
+      - "$ROOT:/app:delegated"
+    command: "npm install && npx prisma generate"
+
+  postgres:
+    image: postgres
+    container_name: red_postgres
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=toor
+      - POSTGRES_DB=red
+    ports:
+      - "5432:5432"
       
   app:
-    image: ghcr.io/ipassternak/red:${COMMIT_SHA:-latest}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.web.loadbalancer.server.port=8080"
-      - "traefik.http.routers.web.rule=Host(`${HOST}`)"
-      - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.tls.certresolver=myresolver"
-      - "traefik.http.routers.web.middlewares=ratelimit"
-      - "traefik.http.middlewares.ratelimit.rateLimit.average=5"
-      - "traefik.http.middlewares.ratelimit.rateLimit.burst=10"
+    container_name: red_app
+    volumes:
+      - "$ROOT:/app:delegated"
+    build:
+      context: "$ROOT"
+      dockerfile_inline: |
+        FROM node:20-alpine
+        VOLUME /app
+        WORKDIR /app
+        RUN npm install -g @nestjs/cli
+        USER node
+        CMD npm run start:dev
     environment:
       - PORT=8080
-    configs:
-      - source: app-config
-        target: /app/config.json
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: on-failure
-      update_config:
-        parallelism: 1
-        delay: 10s
-        order: start-first
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-volumes:
-  letsencrypt:
-
-configs:
-  app-config:
-    external: true
-    name: ${STACK}_app-config-${CONFIG_VERSION:-latest}
+      - DATABASE_URL=postgres://root:toor@postgres:5432/red
+    ports:
+      - "8080:8080"
+    depends_on:
+      npm:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started

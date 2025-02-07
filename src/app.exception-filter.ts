@@ -20,7 +20,10 @@ export class AppExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    this.logger.error(exception);
+    this.logger.error({
+      service: `${AppExceptionFilter}.catch`,
+      error: exception,
+    });
 
     const payload: AppExceptionPayload = {
       statusCode: DEFAULT_STATUS_CODE,

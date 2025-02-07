@@ -20,7 +20,22 @@
   "auth": {
     "jwt": {
       "secret": "MINIMUM_THIRTY_TWO_SYMBOLIC_SECRET",
-      "expiresIn": "5m"
-    }
+      "accessTtl": 300000,
+      "refreshTtl": 604800000,
+      "refreshNotBefore": 180000
+    },
+    "oauth": {
+      "google": {
+        "clientId": "GOOGLE_CLIENT_ID",
+        "clientSecret": "GOOGLE_CLIENT_SECRET",
+        "redirectUri": "http://localhost:${PORT:-8080}/api/auth/oauth/google/callback"
+      },
+      "successRedirectUri": "http://localhost:3000/auth/success",
+      "errorRedirectUri": "http://localhost:3000/auth/error"
+    },
+    "activeSessionsLimit": 5
+  },
+  "database": {
+    "url": "${DATABASE_URL:-postgresql://root:toor@localhost:5432/red}"
   }
 }

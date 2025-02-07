@@ -16,6 +16,7 @@ export class AppException extends HttpException {
   readonly name = 'AppException';
   readonly errorCode: string | null;
   readonly details: unknown;
+  readonly message: string;
 
   constructor(
     message: string,
@@ -33,11 +34,13 @@ export const createAppException = (
   message: string,
   statusCode: HttpStatus,
   errorCode: string | null = null,
-  error: unknown = null,
+  details: unknown = null,
 ): new () => AppException =>
   class extends AppException {
+    readonly statusCode = statusCode;
+
     constructor() {
-      super(message, statusCode, errorCode, error);
+      super(message, statusCode, errorCode, details);
     }
   };
 

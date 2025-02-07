@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { OAuthGoogleStrategy } from './strategies/oauth-google.strategy';
 
 @Module({
   imports: [
@@ -16,15 +17,17 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService<AppConfigDto, true>) => ({
         secret: configService.get('auth.jwt.secret', { infer: true }),
-        signOptions: {
-          expiresIn: configService.get('auth.jwt.expiresIn', { infer: true }),
-        },
       }),
       inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtAccessStrategy, JwtRefreshStrategy],
+  providers: [
+    AuthService,
+    JwtAccessStrategy,
+    JwtRefreshStrategy,
+    OAuthGoogleStrategy,
+  ],
   exports: [],
 })
 export class AuthModule {}

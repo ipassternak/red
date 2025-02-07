@@ -1,11 +1,12 @@
 import { Type } from 'class-transformer';
 import {
-  IsArray,
+  IsInt,
   IsNotEmpty,
   IsNotEmptyObject,
   IsOptional,
   IsString,
   Length,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -15,23 +16,43 @@ export class JwtConfigDto {
   @Length(32, 128)
   secret: string;
 
-  @IsString()
-  @IsNotEmpty()
-  expiresIn: string;
+  @IsInt()
+  accessTtl: number;
+
+  @IsInt()
+  refreshTtl: number;
+
+  @IsInt()
+  refreshNotBefore: number;
 }
 
-export class TestUserDto {
+export class OAuthGoogleConfigDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  clientId: string;
 
   @IsString()
   @IsNotEmpty()
-  username: string;
+  clientSecret: string;
 
   @IsString()
   @IsNotEmpty()
-  password: string;
+  redirectUri: string;
+}
+
+export class OAuthConfigDto {
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => OAuthGoogleConfigDto)
+  google: OAuthGoogleConfigDto = new OAuthGoogleConfigDto();
+
+  @IsString()
+  @IsNotEmpty()
+  successRedirectUri: string;
+
+  @IsString()
+  @IsNotEmpty()
+  errorRedirectUri: string;
 }
 
 export class AuthConfigDto {
@@ -40,9 +61,13 @@ export class AuthConfigDto {
   @Type(() => JwtConfigDto)
   jwt: JwtConfigDto = new JwtConfigDto();
 
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => OAuthConfigDto)
+  oauth: OAuthConfigDto = new OAuthConfigDto();
+
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TestUserDto)
-  testUsers: TestUserDto[] = [];
+  @IsInt()
+  @Min(1)
+  activeSessionsLimit = Infinity;
 }

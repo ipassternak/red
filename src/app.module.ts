@@ -13,6 +13,7 @@ import { loadConfig } from '@lib/utils/config';
 import { AppConfigDto } from 'config/app.dto';
 
 import { AuthModule } from './auth/auth.module';
+import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -40,6 +41,7 @@ import { HealthModule } from './health/health.module';
       inject: [ConfigService],
     }),
     HealthModule,
+    DatabaseModule,
     AuthModule,
   ],
   controllers: [],

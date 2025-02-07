@@ -6,6 +6,8 @@ COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY lib/ lib/
 COPY config/ config/
 COPY src/ src/
+COPY prisma/schema.prisma prisma/schema.prisma
+RUN npx prisma generate
 RUN npm run build
 RUN npm prune --production
 

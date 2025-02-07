@@ -1,0 +1,100 @@
+services:
+  reverse-proxy:
+    image: traefik:v3.1
+    command:
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - mode: host
+        protocol: tcp
+        published: 80
+        target: 80
+      - mode: host
+        protocol: tcp
+        published: 443
+        target: 443
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+  app:
+    image: ghcr.io/ipassternak/red:${COMMIT_SHA:-latest}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.web.loadbalancer.server.port=8080"
+      - "traefik.http.routers.web.rule=Host(`${HOST}`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
+      - "traefik.http.routers.web.middlewares=ratelimit"
+      - "traefik.http.middlewares.ratelimit.rateLimit.average=5"
+      - "traefik.http.middlewares.ratelimit.rateLimit.burst=10"
+    environment:
+      - PORT=8080
+    configs:
+      - source: app-config
+        target: /app/config.json
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      postgres:
+        condition: service_started
+
+  postgres:
+    image: postgres:17.2
+    secrets:
+      - postgres_password
+      - postgres_user
+      - postgres_db
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB_FILE=/run/secrets/postgres_db
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $(cat /run/secrets/postgres_user)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+volumes:
+  letsencrypt:
+  postgres:
+    driver: local
+
+configs:
+  app-config:
+    external: true
+    name: ${STACK}_app-config-${CONFIG_VERSION:-latest}
+
+secrets:
+  postgres_password:
+    external: true
+    name: ${STACK}_postgres_password
+  postgres_user:
+    external: true
+    name: ${STACK}_postgres_user
+  postgres_db:
+    external: true
+    name: ${STACK}_postgres_db
