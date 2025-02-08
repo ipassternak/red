@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { OAuthGithubStrategy } from './strategies/oauth-github.strategy';
 import { OAuthGoogleStrategy } from './strategies/oauth-google.strategy';
 
 @Module({
@@ -27,6 +28,7 @@ import { OAuthGoogleStrategy } from './strategies/oauth-google.strategy';
     JwtAccessStrategy,
     JwtRefreshStrategy,
     OAuthGoogleStrategy,
+    OAuthGithubStrategy,
   ],
   exports: [],
 })

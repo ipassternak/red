@@ -30,6 +30,11 @@
         "clientSecret": "GOOGLE_CLIENT_SECRET",
         "redirectUri": "http://localhost:${PORT:-8080}/api/auth/oauth/google/callback"
       },
+      "github": {
+        "clientId": "GITHUB_CLIENT_ID",
+        "clientSecret": "GITHUB_CLIENT_SECRET",
+        "redirectUri": "http://localhost:${PORT:-8080}/api/auth/oauth/github/callback"
+      },
       "successRedirectUri": "http://localhost:3000/auth/success",
       "errorRedirectUri": "http://localhost:3000/auth/error"
     },

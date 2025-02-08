@@ -10,13 +10,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, Session, User } from '@prisma/client';
+import { Profile as OAuthGithubProfile } from 'passport-github2';
+import { Profile as OAuthGoogleProfile } from 'passport-google-oauth20';
 
 import { AppConfigDto } from '@config/app.dto';
-import {
-  AuthAccessPayload,
-  AuthRefreshPayload,
-  OAuthGooglePayload,
-} from '@lib/types/auth';
+import { AuthAccessPayload, AuthRefreshPayload } from '@lib/types/auth';
 import { AppException, createAppException } from '@lib/utils/exception';
 import { PrismaService } from '@src/database/prisma.service';
 
@@ -35,6 +33,7 @@ export const ActiveSessionsLimitException = createAppException(
 );
 
 const OAUTH_GOOGLE_PREFIX = 'google';
+const OAUTH_GITHUB_PREFIX = 'github';
 
 @Injectable()
 export class AuthService {
@@ -260,12 +259,23 @@ export class AuthService {
     }
   }
 
-  async oauthGoogle(payload: OAuthGooglePayload): Promise<URL> {
-    const email = payload.emails.find((e) => e.verified) ?? payload.emails[0];
+  async oauthGoogle(profile: OAuthGoogleProfile): Promise<URL> {
+    const { emails = [] } = profile;
+    const email = emails.find((e) => e.verified) ?? emails[0];
     return await this.redirectLogin({
-      oid: `${OAUTH_GOOGLE_PREFIX}:${payload.id}`,
+      oid: `${OAUTH_GOOGLE_PREFIX}:${profile.id}`,
       email: email.value,
-      fullName: payload.displayName,
+      fullName: profile.displayName,
+    });
+  }
+
+  async oauthGithub(profile: OAuthGithubProfile): Promise<URL> {
+    const { emails = [] } = profile;
+    const email = emails[0];
+    return await this.redirectLogin({
+      oid: `${OAUTH_GITHUB_PREFIX}:${profile.id}`,
+      email: email.value,
+      fullName: profile.displayName,
     });
   }
 }

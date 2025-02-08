@@ -17,17 +17,16 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
+import { Profile as OAuthGithubProfile } from 'passport-github2';
+import { Profile as OAuthGoogleProfile } from 'passport-google-oauth20';
 
-import {
-  AuthAccessPayload,
-  AuthRefreshPayload,
-  OAuthGooglePayload,
-} from '@lib/types/auth';
+import { AuthAccessPayload, AuthRefreshPayload } from '@lib/types/auth';
 
 import { AuthService } from './auth.service';
 import { TokenResponseDto, UserResponseDto } from './dto/auth.dto';
 import { JwtAccessGuard } from './guards/jwt-access.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { OAuthGithubGuard } from './guards/oauth-github.guard';
 import { OAuthGoogleGuard } from './guards/oauth-google.guard';
 
 @Controller('/api/auth')
@@ -84,10 +83,30 @@ export class AuthController {
   @Redirect()
   @ApiExcludeEndpoint()
   async oauthGoogleCallback(
-    @Req() request: { oauthPayload: OAuthGooglePayload },
+    @Req() request: { oauthProfile: OAuthGoogleProfile },
   ): Promise<HttpRedirectResponse> {
-    const { oauthPayload } = request;
-    const url = await this.authService.oauthGoogle(oauthPayload);
+    const { oauthProfile } = request;
+    const url = await this.authService.oauthGoogle(oauthProfile);
+    return { url: url.toString(), statusCode: 302 };
+  }
+
+  @UseGuards(OAuthGithubGuard)
+  @Get('oauth/github')
+  @ApiOperation({ description: 'OAuth with GitHub' })
+  @ApiFoundResponse({ description: 'Redirect to GitHub OAuth' })
+  async oauthGithub(): Promise<void> {
+    return;
+  }
+
+  @UseGuards(OAuthGithubGuard)
+  @Get('oauth/github/callback')
+  @Redirect()
+  @ApiExcludeEndpoint()
+  async oauthGithubCallback(
+    @Req() request: { oauthProfile: OAuthGithubProfile },
+  ): Promise<HttpRedirectResponse> {
+    const { oauthProfile } = request;
+    const url = await this.authService.oauthGithub(oauthProfile);
     return { url: url.toString(), statusCode: 302 };
   }
 }

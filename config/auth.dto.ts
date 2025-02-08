@@ -41,11 +41,30 @@ export class OAuthGoogleConfigDto {
   redirectUri: string;
 }
 
+export class OAuthGithubConfigDto {
+  @IsString()
+  @IsNotEmpty()
+  clientId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  clientSecret: string;
+
+  @IsString()
+  @IsNotEmpty()
+  redirectUri: string;
+}
+
 export class OAuthConfigDto {
   @IsNotEmptyObject()
   @ValidateNested()
   @Type(() => OAuthGoogleConfigDto)
   google: OAuthGoogleConfigDto = new OAuthGoogleConfigDto();
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => OAuthGithubConfigDto)
+  github: OAuthGithubConfigDto = new OAuthGithubConfigDto();
 
   @IsString()
   @IsNotEmpty()

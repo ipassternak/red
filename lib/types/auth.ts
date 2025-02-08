@@ -9,10 +9,3 @@ export interface AuthAccessPayload {
   gid: string;
   sub: string;
 }
-
-export interface OAuthGooglePayload {
-  id: string;
-  displayName: string;
-  emails: { value: string; verified: boolean }[];
-  photos: { value: string }[];
-}

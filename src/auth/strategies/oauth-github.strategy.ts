@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
+import { Profile, Strategy } from 'passport-github2';
 
 import { AppConfigDto } from '@config/app.dto';
 
 @Injectable()
-export class OAuthGoogleStrategy extends PassportStrategy(
+export class OAuthGithubStrategy extends PassportStrategy(
   Strategy,
-  'oauth-google',
+  'oauth-github',
 ) {
   constructor(configService: ConfigService<AppConfigDto, true>) {
     super({
-      clientID: configService.get('auth.oauth.google.clientId', {
+      clientID: configService.get('auth.oauth.github.clientId', {
         infer: true,
       }),
-      clientSecret: configService.get('auth.oauth.google.clientSecret', {
+      clientSecret: configService.get('auth.oauth.github.clientSecret', {
         infer: true,
       }),
-      callbackURL: configService.get('auth.oauth.google.redirectUri', {
+      callbackURL: configService.get('auth.oauth.github.redirectUri', {
         infer: true,
       }),
-      scope: ['email', 'profile'],
+      scope: ['user:email'],
     });
   }
 
@@ -29,8 +29,7 @@ export class OAuthGoogleStrategy extends PassportStrategy(
     _accessToken: string,
     _refreshToken: string,
     profile: Profile,
-    done: VerifyCallback,
-  ): Promise<void> {
-    done(null, profile);
+  ): Promise<Profile> {
+    return profile;
   }
 }
