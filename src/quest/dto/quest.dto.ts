@@ -27,6 +27,7 @@ export enum QuestSortColumn {
 
 export class GetQuestListParamsDto extends PageableDto {
   @ApiProperty({
+    required: false,
     description: 'Search by title',
     minLength: 3,
   })

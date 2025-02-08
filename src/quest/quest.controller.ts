@@ -31,8 +31,6 @@ import {
 } from './dto/quest.dto';
 import { QuestService } from './quest.service';
 
-@UseGuards(JwtAccessGuard)
-@ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('/api/quests')
 export class QuestController {
@@ -59,7 +57,9 @@ export class QuestController {
     return await this.questService.get(id, request.accessPayload);
   }
 
+  @UseGuards(JwtAccessGuard)
   @Post()
+  @ApiBearerAuth()
   @ApiOperation({ description: 'Create new unpublished quest' })
   @SerializeOptions({ type: QuestResponseDto })
   @ApiCreatedResponse({ type: QuestResponseDto })
@@ -71,7 +71,9 @@ export class QuestController {
     return await this.questService.create(data, accessPayload);
   }
 
+  @UseGuards(JwtAccessGuard)
   @Post('/:id/change-visibility')
+  @ApiBearerAuth()
   @ApiOperation({ description: 'Change quest visibility' })
   @ApiOkResponse({ type: QuestResponseDto })
   @HttpCode(200)
