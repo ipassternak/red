@@ -22,7 +22,7 @@ import {
 } from './dto/quest.dto';
 
 export const QuestAccessForbiddenException = createAppException(
-  'Only author can view unpublished quest',
+  'Only author can view or change the quest',
   HttpStatus.FORBIDDEN,
   'QUEST_ERR_ACCESS_FORBIDDEN',
 );
@@ -124,6 +124,8 @@ export class QuestService {
     access: AuthAccessPayload,
   ): Promise<QuestResponseDto> {
     const quest = await this.get(id, access);
+    if (quest.authorId !== access.sub)
+      throw new QuestAccessForbiddenException();
     if (quest.status === data.status)
       throw new ConflictException('Invaid quest status');
     return await this.prismaService.quest.update({
