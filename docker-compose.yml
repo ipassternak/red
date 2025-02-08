@@ -6,10 +6,10 @@ services:
         VOLUME /app
         WORKDIR /app
         USER node
+        CMD npm install
     container_name: red_npm
     volumes:
       - "$ROOT:/app:delegated"
-    command: "npm install && npx prisma generate"
 
   postgres:
     image: postgres
@@ -20,6 +20,11 @@ services:
       - POSTGRES_DB=red
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
       
   app:
     container_name: red_app
@@ -33,7 +38,7 @@ services:
         WORKDIR /app
         RUN npm install -g @nestjs/cli
         USER node
-        CMD npm run start:dev
+        CMD npm run migrate:dev && npm run start:dev
     environment:
       - PORT=8080
       - DATABASE_URL=postgres://root:toor@postgres:5432/red
@@ -43,4 +48,4 @@ services:
       npm:
         condition: service_completed_successfully
       postgres:
-        condition: service_started
+        condition: service_healthy

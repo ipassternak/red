@@ -42,5 +42,8 @@
   },
   "database": {
     "url": "${DATABASE_URL:-postgresql://root:toor@localhost:5432/red}"
+  },
+  "scheduler": {
+    "authCleanupSessions": "0 0 * * *"
   }
 }

@@ -3,6 +3,7 @@ import { IsNotEmptyObject, ValidateNested } from 'class-validator';
 
 import { AuthConfigDto } from './auth.dto';
 import { DatabaseConfigDto } from './database.dto';
+import { SchedulerConfigDto } from './scheduler';
 import { ServerConfigDto } from './server.dto';
 
 export class AppConfigDto {
@@ -20,4 +21,9 @@ export class AppConfigDto {
   @ValidateNested()
   @Type(() => DatabaseConfigDto)
   database = new DatabaseConfigDto();
+
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => SchedulerConfigDto)
+  scheduler = new SchedulerConfigDto();
 }

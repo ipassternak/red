@@ -30,6 +30,6 @@ import { OAuthGoogleStrategy } from './strategies/oauth-google.strategy';
     OAuthGoogleStrategy,
     OAuthGithubStrategy,
   ],
-  exports: [],
+  exports: [AuthService],
 })
 export class AuthModule {}

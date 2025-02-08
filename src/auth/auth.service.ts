@@ -38,17 +38,12 @@ const OAUTH_GITHUB_PREFIX = 'github';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private readonly sessionRepository: Prisma.SessionDelegate;
-  private readonly userRepository: Prisma.UserDelegate;
 
   constructor(
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly jwtService: JwtService,
-    prisma: PrismaService,
-  ) {
-    this.sessionRepository = prisma.session;
-    this.userRepository = prisma.user;
-  }
+    private readonly prisma: PrismaService,
+  ) {}
 
   private async issueTokens(session: Session): Promise<TokenResponseDto> {
     const accessPayload: AuthAccessPayload = {
@@ -78,7 +73,7 @@ export class AuthService {
     const sid = randomUUID();
     const gid = randomUUID();
     const sub = user.id;
-    const session = await this.sessionRepository.create({
+    const session = await this.prisma.session.create({
       data: {
         sid,
         gid,
@@ -90,7 +85,7 @@ export class AuthService {
 
   private async rotateSession(session: Session): Promise<TokenResponseDto> {
     const gid = randomUUID();
-    await this.sessionRepository.update({
+    await this.prisma.session.update({
       where: {
         sid: session.sid,
       },
@@ -103,16 +98,26 @@ export class AuthService {
   }
 
   private async revokeSession(session: Session): Promise<void> {
-    await this.sessionRepository.delete({
+    await this.prisma.session.delete({
       where: {
         sid: session.sid,
       },
     });
   }
 
+  async cleanupSessions(): Promise<void> {
+    const refreshTtl = this.configService.get('auth.jwt.refreshTtl', {
+      infer: true,
+    });
+    await this.prisma.$queryRaw`
+      DELETE FROM "sessions"
+      WHERE "created_at" < NOW() - MAKE_INTERVAL(secs => ${refreshTtl} / 1000)
+    `;
+  }
+
   async verifyRefresh(payload: AuthRefreshPayload): Promise<boolean> {
     if (payload.use !== 'refresh') return false;
-    const session = await this.sessionRepository.findUnique({
+    const session = await this.prisma.session.findUnique({
       where: {
         sid: payload.sid,
       },
@@ -132,7 +137,7 @@ export class AuthService {
 
   async verifyAccess(payload: AuthAccessPayload): Promise<boolean> {
     if (payload.use !== 'access') return false;
-    const session = await this.sessionRepository.findFirst({
+    const session = await this.prisma.session.findFirst({
       where: {
         gid: payload.gid,
       },
@@ -147,7 +152,7 @@ export class AuthService {
       infer: true,
     });
     if (limit === undefined) return true;
-    const activeSessionsCount = await this.sessionRepository.count({
+    const activeSessionsCount = await this.prisma.session.count({
       where: {
         sub: user.id,
       },
@@ -156,7 +161,7 @@ export class AuthService {
   }
 
   async refresh(payload: AuthRefreshPayload): Promise<TokenResponseDto> {
-    const session = await this.sessionRepository.findUniqueOrThrow({
+    const session = await this.prisma.session.findUniqueOrThrow({
       where: {
         sid: payload.sid,
       },
@@ -170,7 +175,7 @@ export class AuthService {
   }
 
   async me(payload: AuthAccessPayload): Promise<UserResponseDto> {
-    const user = await this.userRepository.findUniqueOrThrow({
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: payload.sub,
       },
@@ -180,7 +185,7 @@ export class AuthService {
   }
 
   async logout(payload: AuthAccessPayload): Promise<void> {
-    const session = await this.sessionRepository.findFirstOrThrow({
+    const session = await this.prisma.session.findFirstOrThrow({
       where: {
         gid: payload.gid,
       },
@@ -197,7 +202,7 @@ export class AuthService {
     email: string;
     fullName: string;
   }): Promise<TokenResponseDto> {
-    const user = await this.userRepository
+    const user = await this.prisma.user
       .upsert({
         where: {
           oid,
