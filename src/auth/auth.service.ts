@@ -17,8 +17,10 @@ import { AppConfigDto } from '@config/app.dto';
 import { AuthAccessPayload, AuthRefreshPayload } from '@lib/types/auth';
 import { AppException, createAppException } from '@lib/utils/exception';
 import { PrismaService } from '@src/database/prisma.service';
+import { UserResponseDto } from '@src/user/dto/user.dto';
+import { UserService } from '@src/user/user.service';
 
-import { TokenResponseDto, UserResponseDto } from './dto/auth.dto';
+import { TokenResponseDto } from './dto/auth.dto';
 
 export const CredentialsAlreadyTakenException = createAppException(
   'Credentials already taken',
@@ -42,7 +44,8 @@ export class AuthService {
   constructor(
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
+    private readonly prismaService: PrismaService,
+    private readonly userService: UserService,
   ) {}
 
   private async issueTokens(session: Session): Promise<TokenResponseDto> {
@@ -73,7 +76,7 @@ export class AuthService {
     const sid = randomUUID();
     const gid = randomUUID();
     const sub = user.id;
-    const session = await this.prisma.session.create({
+    const session = await this.prismaService.session.create({
       data: {
         sid,
         gid,
@@ -85,7 +88,7 @@ export class AuthService {
 
   private async rotateSession(session: Session): Promise<TokenResponseDto> {
     const gid = randomUUID();
-    await this.prisma.session.update({
+    await this.prismaService.session.update({
       where: {
         sid: session.sid,
       },
@@ -98,7 +101,7 @@ export class AuthService {
   }
 
   private async revokeSession(session: Session): Promise<void> {
-    await this.prisma.session.delete({
+    await this.prismaService.session.delete({
       where: {
         sid: session.sid,
       },
@@ -109,7 +112,7 @@ export class AuthService {
     const refreshTtl = this.configService.get('auth.jwt.refreshTtl', {
       infer: true,
     });
-    await this.prisma.$queryRaw`
+    await this.prismaService.$queryRaw`
       DELETE FROM "sessions"
       WHERE "created_at" < NOW() - MAKE_INTERVAL(secs => ${refreshTtl} / 1000)
     `;
@@ -117,7 +120,7 @@ export class AuthService {
 
   async verifyRefresh(payload: AuthRefreshPayload): Promise<boolean> {
     if (payload.use !== 'refresh') return false;
-    const session = await this.prisma.session.findUnique({
+    const session = await this.prismaService.session.findUnique({
       where: {
         sid: payload.sid,
       },
@@ -137,7 +140,7 @@ export class AuthService {
 
   async verifyAccess(payload: AuthAccessPayload): Promise<boolean> {
     if (payload.use !== 'access') return false;
-    const session = await this.prisma.session.findFirst({
+    const session = await this.prismaService.session.findFirst({
       where: {
         gid: payload.gid,
       },
@@ -152,7 +155,7 @@ export class AuthService {
       infer: true,
     });
     if (limit === undefined) return true;
-    const activeSessionsCount = await this.prisma.session.count({
+    const activeSessionsCount = await this.prismaService.session.count({
       where: {
         sub: user.id,
       },
@@ -161,7 +164,7 @@ export class AuthService {
   }
 
   async refresh(payload: AuthRefreshPayload): Promise<TokenResponseDto> {
-    const session = await this.prisma.session.findUniqueOrThrow({
+    const session = await this.prismaService.session.findUniqueOrThrow({
       where: {
         sid: payload.sid,
       },
@@ -175,17 +178,11 @@ export class AuthService {
   }
 
   async me(payload: AuthAccessPayload): Promise<UserResponseDto> {
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: {
-        id: payload.sub,
-      },
-    });
-
-    return user;
+    return await this.userService.get(payload.sub);
   }
 
   async logout(payload: AuthAccessPayload): Promise<void> {
-    const session = await this.prisma.session.findFirstOrThrow({
+    const session = await this.prismaService.session.findFirstOrThrow({
       where: {
         gid: payload.gid,
       },
@@ -202,7 +199,7 @@ export class AuthService {
     email: string;
     fullName: string;
   }): Promise<TokenResponseDto> {
-    const user = await this.prisma.user
+    const user = await this.prismaService.user
       .upsert({
         where: {
           oid,

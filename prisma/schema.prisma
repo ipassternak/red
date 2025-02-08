@@ -16,6 +16,10 @@ model User {
   createdAt DateTime  @default(now()) @map("created_at")
   sessions  Session[]
 
+  quests   Quest[]
+  reviews  QuestReview[]
+  attempts QuestAttempt[]
+
   @@map("users")
 }
 
@@ -28,4 +32,77 @@ model Session {
   subject   User     @relation(fields: [sub], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+enum QuestStatus {
+  UNPUBLISHED
+  PUBLISHED
+
+  @@map("quest_status")
+}
+
+enum QuestDifficulty {
+  EASY
+  MEDIUM
+  HARD
+
+  @@map("quest_difficulty")
+}
+
+model Quest {
+  id            String          @id @default(uuid()) @db.VarChar(36)
+  authorId      String          @map("author_id") @db.VarChar(36)
+  author        User            @relation(fields: [authorId], references: [id])
+  title         String          @unique @db.VarChar(255)
+  description   String          @db.VarChar(4000)
+  status        QuestStatus     @default(UNPUBLISHED)
+  difficulty    QuestDifficulty @default(MEDIUM)
+  timeLimit     Int             @default(0) @map("time_limit")
+  totalTasks    Int             @default(0) @map("total_tasks")
+  totalAttempts Int             @default(0) @map("total_attempts")
+  totalSolved   Int             @default(0) @map("total_solved")
+  avgSolvedTime Float           @default(0) @map("avg_solved_time")
+  avgRating     Float           @default(0) @map("avg_rating")
+  updatedAt     DateTime        @default(now()) @updatedAt @map("updated_at")
+  createdAt     DateTime        @default(now()) @map("created_at")
+
+  reviews  QuestReview[]
+  attempts QuestAttempt[]
+
+  @@map("quests")
+}
+
+model QuestReview {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  questId    String   @map("quest_id") @db.VarChar(36)
+  quest      Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  reviewerId String   @map("reviewer_id") @db.VarChar(36)
+  reviewer   User     @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  rating     Float    @default(0)
+  comment    String?  @db.VarChar(2000)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("quest_reviews")
+}
+
+enum QuestAttemptStatus {
+  PENDING
+  SOLVED
+  FAILED
+
+  @@map("quest_attempt_status")
+}
+
+model QuestAttempt {
+  id        String             @id @default(uuid()) @db.VarChar(36)
+  questId   String             @map("quest_id") @db.VarChar(36)
+  quest     Quest              @relation(fields: [questId], references: [id], onDelete: Cascade)
+  userId    String             @map("user_id") @db.VarChar(36)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    QuestAttemptStatus @default(PENDING)
+  updatedAt DateTime           @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  @@map("quest_attempts")
 }

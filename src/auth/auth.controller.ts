@@ -1,4 +1,5 @@
 import {
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
@@ -6,7 +7,9 @@ import {
   Post,
   Redirect,
   Req,
+  SerializeOptions,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -21,9 +24,10 @@ import { Profile as OAuthGithubProfile } from 'passport-github2';
 import { Profile as OAuthGoogleProfile } from 'passport-google-oauth20';
 
 import { AuthAccessPayload, AuthRefreshPayload } from '@lib/types/auth';
+import { UserResponseDto } from '@src/user/dto/user.dto';
 
 import { AuthService } from './auth.service';
-import { TokenResponseDto, UserResponseDto } from './dto/auth.dto';
+import { TokenResponseDto } from './dto/auth.dto';
 import { JwtAccessGuard } from './guards/jwt-access.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { OAuthGithubGuard } from './guards/oauth-github.guard';
@@ -34,7 +38,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @UseGuards(JwtRefreshGuard)
-  @Post('refresh')
+  @Post('/refresh')
   @ApiBearerAuth()
   @ApiOperation({ description: 'Refresh active session' })
   @ApiCreatedResponse({ type: TokenResponseDto })
@@ -46,7 +50,9 @@ export class AuthController {
   }
 
   @UseGuards(JwtAccessGuard)
-  @Get('me')
+  @UseInterceptors(ClassSerializerInterceptor)
+  @SerializeOptions({ type: UserResponseDto })
+  @Get('/me')
   @ApiBearerAuth()
   @ApiOperation({ description: 'Get active session subject' })
   @ApiOkResponse({ type: UserResponseDto })
@@ -58,7 +64,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAccessGuard)
-  @Post('logout')
+  @Post('/logout')
   @HttpCode(204)
   @ApiBearerAuth()
   @ApiOperation({ description: 'Log out active session' })
@@ -71,7 +77,7 @@ export class AuthController {
   }
 
   @UseGuards(OAuthGoogleGuard)
-  @Get('oauth/google')
+  @Get('/oauth/google')
   @ApiOperation({ description: 'OAuth with Google' })
   @ApiFoundResponse({ description: 'Redirect to Google OAuth' })
   async oauthGoogle(): Promise<void> {
@@ -79,7 +85,7 @@ export class AuthController {
   }
 
   @UseGuards(OAuthGoogleGuard)
-  @Get('oauth/google/callback')
+  @Get('/oauth/google/callback')
   @Redirect()
   @ApiExcludeEndpoint()
   async oauthGoogleCallback(
@@ -91,7 +97,7 @@ export class AuthController {
   }
 
   @UseGuards(OAuthGithubGuard)
-  @Get('oauth/github')
+  @Get('/oauth/github')
   @ApiOperation({ description: 'OAuth with GitHub' })
   @ApiFoundResponse({ description: 'Redirect to GitHub OAuth' })
   async oauthGithub(): Promise<void> {
@@ -99,7 +105,7 @@ export class AuthController {
   }
 
   @UseGuards(OAuthGithubGuard)
-  @Get('oauth/github/callback')
+  @Get('/oauth/github/callback')
   @Redirect()
   @ApiExcludeEndpoint()
   async oauthGithubCallback(

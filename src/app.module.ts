@@ -15,7 +15,9 @@ import { AppConfigDto } from 'config/app.dto';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { QuestModule } from './quest/quest.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     DatabaseModule,
     SchedulerModule,
     AuthModule,
+    UserModule,
+    QuestModule,
   ],
   controllers: [],
   providers: [],
