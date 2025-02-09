@@ -29,6 +29,7 @@ import {
   CreateSceneDataDto,
   InteractionListResponseDto,
   InteractionWithMetadataResponseDto,
+  ManageInteractionDependenciesDataDto,
   QuestMetadataResponseDto,
   SceneListResponseDto,
   SceneWithMetadataResponseDto,
@@ -200,6 +201,25 @@ export class ConstructorController {
     return await this.constructorService.deleteInteraction(
       questId,
       interactionId,
+      accessPayload,
+    );
+  }
+
+  @Post('/:questId/interactions/:questInteractionId/manage-dependencies')
+  @ApiOperation({ description: 'Manage interaction dependencies' })
+  @SerializeOptions({ type: InteractionWithMetadataResponseDto })
+  @ApiOkResponse({ type: InteractionWithMetadataResponseDto })
+  async manageInteractionDependencies(
+    @Param('questId') questId: string,
+    @Param('questInteractionId') interactionId: string,
+    @Body() data: ManageInteractionDependenciesDataDto,
+    @Req() request: { accessPayload: AuthAccessPayload },
+  ): Promise<InteractionWithMetadataResponseDto> {
+    const { accessPayload } = request;
+    return await this.constructorService.manageInteractionDependencies(
+      questId,
+      interactionId,
+      data,
       accessPayload,
     );
   }

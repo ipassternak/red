@@ -81,7 +81,7 @@ export class UpdateSceneDataDto {
   height?: number;
 }
 
-export class QuestionInteractionData {
+export class QuestionInteractionDataDto {
   @ApiProperty({
     description: 'The template of the question',
     minLength: 1,
@@ -106,7 +106,7 @@ export class QuestionInteractionData {
   answers: string[];
 }
 
-export class TransitionInteractionData {
+export class TransitionInteractionDataDto {
   @ApiProperty({
     description: 'The ID of the target scene',
   })
@@ -177,24 +177,25 @@ export class CreateInteractionDataDto {
   @ApiProperty({
     required: false,
     description: 'The data of the question interaction',
-    type: QuestionInteractionData,
+    type: QuestionInteractionDataDto,
   })
   @IsOptional()
-  @Type(() => QuestionInteractionData)
+  @Type(() => QuestionInteractionDataDto)
   @ValidateNested()
-  question?: QuestionInteractionData;
+  question?: QuestionInteractionDataDto;
 
   @ApiProperty({
     required: false,
     description: 'The data of the transition interaction',
-    type: [TransitionInteractionData],
+    type: TransitionInteractionDataDto,
+    isArray: true,
   })
   @IsOptional()
   @IsArray()
   @ArrayMinSize(1)
-  @Type(() => TransitionInteractionData)
+  @Type(() => TransitionInteractionDataDto)
   @ValidateNested({ each: true })
-  transitions?: TransitionInteractionData[];
+  transitions?: TransitionInteractionDataDto[];
 }
 
 export class UpdateInteractionDataDto {
@@ -255,12 +256,35 @@ export class UpdateInteractionDataDto {
   @ApiProperty({
     required: false,
     description: 'The data of the question interaction',
-    type: QuestionInteractionData,
+    type: QuestionInteractionDataDto,
   })
   @IsOptional()
-  @Type(() => QuestionInteractionData)
+  @Type(() => QuestionInteractionDataDto)
   @ValidateNested()
-  question: QuestionInteractionData;
+  question: QuestionInteractionDataDto;
+}
+
+export class InteractionDependencyDataDto {
+  @ApiProperty({
+    description: 'The ID of the dependency interaction',
+  })
+  @IsString()
+  @IsNotEmpty()
+  dependencyId: string;
+}
+
+export class ManageInteractionDependenciesDataDto {
+  @ApiProperty({ type: InteractionDependencyDataDto, isArray: true })
+  @IsArray()
+  @Type(() => InteractionDependencyDataDto)
+  @ValidateNested({ each: true })
+  add: InteractionDependencyDataDto[];
+
+  @ApiProperty({ type: InteractionDependencyDataDto, isArray: true })
+  @IsArray()
+  @Type(() => InteractionDependencyDataDto)
+  @ValidateNested({ each: true })
+  remove: InteractionDependencyDataDto[];
 }
 
 // Responses
@@ -370,7 +394,7 @@ export class InteractionResponseDto extends ResponseDto {
   @ApiProperty({ description: 'The creation date of the interaction' })
   createdAt: Date;
 
-  @ApiProperty({ required: false, type: QuestionInteractionData })
+  @ApiProperty({ required: false, type: QuestionInteractionDataDto })
   @Expose()
   @Transform(({ obj }: { obj: InteractionResponseDto }) => {
     if (obj.question) return obj.question;
@@ -381,15 +405,26 @@ export class InteractionResponseDto extends ResponseDto {
         answers: <string[]>JSON.parse(<string>(<unknown>obj.answers ?? '[]')),
       };
   })
-  question?: QuestionInteractionData;
+  question?: QuestionInteractionDataDto;
 
-  @ApiProperty({ required: false, type: TransitionInteractionData })
+  @ApiProperty({
+    required: false,
+    type: TransitionInteractionDataDto,
+    isArray: true,
+  })
   @Expose()
   @Transform(({ obj }: { obj: InteractionResponseDto }) => {
     if (obj.type === QuestInteractionType.TRANSITION)
       return obj.transitions?.map((t) => ({ sceneId: t.sceneId }));
   })
-  transitions?: TransitionInteractionData[];
+  transitions?: TransitionInteractionDataDto[];
+
+  @ApiProperty({ type: InteractionDependencyDataDto, isArray: true })
+  @Expose()
+  @Transform(({ obj }: { obj: InteractionResponseDto }) =>
+    obj.dependencies.map((d) => ({ dependencyId: d.dependencyId })),
+  )
+  dependencies: InteractionDependencyDataDto[];
 }
 
 // eslint-disable-next-line max-len

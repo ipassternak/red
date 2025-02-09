@@ -152,8 +152,8 @@ model QuestInteraction {
   createdAt    DateTime             @default(now()) @map("created_at")
 
   transitions  SceneTansition[]
-  dependants   InteractionLock[] @relation("interaction_dependants")
-  dependencies InteractionLock[] @relation("interaction_dependencies")
+  dependants   InteractionLock[] @relation("interaction_dependencies")
+  dependencies InteractionLock[] @relation("interaction_dependants")
 
   @@map("quest_interactions")
 }
