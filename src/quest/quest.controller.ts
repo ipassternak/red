@@ -17,6 +17,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 
 import { AuthAccessPayload } from '@lib/types/auth';
@@ -33,17 +34,32 @@ import { QuestService } from './quest.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('/api/quests')
+@ApiTags('Quests')
 export class QuestController {
   constructor(private readonly questService: QuestService) {}
 
-  @Get()
-  @ApiOperation({ description: 'Get list of quests' })
+  @Get('/list/gallery')
+  @ApiOperation({ description: 'Get list of quests from the gallery' })
   @SerializeOptions({ type: QuestListResponseDto })
   @ApiOkResponse({ type: QuestListResponseDto })
-  async getList(
+  async getListGallery(
     @Query() params: GetQuestListParamsDto,
   ): Promise<QuestListResponseDto> {
-    return await this.questService.getList(params);
+    return await this.questService.getListGallery(params);
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @Get('/list/authored')
+  @ApiBearerAuth()
+  @ApiOperation({ description: 'Get list of authored quests' })
+  @SerializeOptions({ type: QuestListResponseDto })
+  @ApiOkResponse({ type: QuestListResponseDto })
+  async getListUnpublished(
+    @Query() params: GetQuestListParamsDto,
+    @Req() request: { accessPayload: AuthAccessPayload },
+  ): Promise<QuestListResponseDto> {
+    const { accessPayload } = request;
+    return await this.questService.getListAuthored(params, accessPayload);
   }
 
   @Get('/:id')

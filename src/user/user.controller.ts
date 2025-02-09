@@ -7,7 +7,12 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
 import { JwtAccessGuard } from '@src/auth/guards/jwt-access.guard';
 
@@ -18,6 +23,7 @@ import { UserService } from './user.service';
 @ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('/api/users')
+@ApiTags('Users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

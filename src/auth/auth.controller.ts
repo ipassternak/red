@@ -19,6 +19,7 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { Profile as OAuthGithubProfile } from 'passport-github2';
 import { Profile as OAuthGoogleProfile } from 'passport-google-oauth20';
@@ -34,6 +35,7 @@ import { OAuthGithubGuard } from './guards/oauth-github.guard';
 import { OAuthGoogleGuard } from './guards/oauth-google.guard';
 
 @Controller('/api/auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

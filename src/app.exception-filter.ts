@@ -21,7 +21,7 @@ export class AppExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     this.logger.error({
-      service: `${AppExceptionFilter}.catch`,
+      service: `${AppExceptionFilter.name}.catch`,
       error: exception,
     });
 

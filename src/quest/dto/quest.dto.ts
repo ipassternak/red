@@ -9,20 +9,20 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { ListResponseDto, PageableDto } from '@lib/dto/common.dto';
+import { ListResponseDto, PageableDto, ResponseDto } from '@lib/dto/common.dto';
 import { UserResponseDto } from '@src/user/dto/user.dto';
 
 // Requests
 export enum QuestSortColumn {
-  Title = 'title',
-  TimeLimit = 'timeLimit',
-  TotalTasks = 'totalTasks',
-  TotalAttempts = 'totalAttempts',
-  TotalSolved = 'totalSolved',
-  AvgSolvedTime = 'avgSolvedTime',
-  AvgRating = 'avgRating',
-  UpdatedAt = 'updatedAt',
-  CreatedAt = 'createdAt',
+  TITLE = 'title',
+  TIME_LIMIT = 'timeLimit',
+  TOTAL_TASKS = 'totalTasks',
+  TOTAL_ATTEMPTS = 'totalAttempts',
+  TOTAL_SOLVED = 'totalSolved',
+  AVG_SOLVED_TIME = 'avgSolvedTime',
+  AVG_RATING = 'avgRating',
+  UPDATED_AT = 'updatedAt',
+  CREATED_AT = 'createdAt',
 }
 
 export class GetQuestListParamsDto extends PageableDto {
@@ -37,13 +37,22 @@ export class GetQuestListParamsDto extends PageableDto {
   title?: string;
 
   @ApiProperty({
+    description: 'Status of the quest',
+    enum: QuestStatus,
+    default: QuestStatus.PUBLISHED,
+  })
+  @IsEnum(QuestStatus)
+  @IsOptional()
+  status: QuestStatus = QuestStatus.PUBLISHED;
+
+  @ApiProperty({
     description: 'Sort column',
     enum: QuestSortColumn,
-    default: QuestSortColumn.Title,
+    default: QuestSortColumn.TITLE,
   })
   @IsEnum(QuestSortColumn)
   @IsOptional()
-  sortColumn: QuestSortColumn = QuestSortColumn.Title;
+  sortColumn: QuestSortColumn = QuestSortColumn.TITLE;
 }
 
 export class CreateQuestDataDto {
@@ -84,7 +93,7 @@ export class ChangeQuestVisibilityDto {
 }
 
 // Responses
-export class QuestResponseDto {
+export class QuestResponseDto extends ResponseDto {
   @ApiProperty({ description: 'Unique identifier for the quest' })
   id: string;
 

@@ -42,6 +42,7 @@ export default tseslint.config(
         'error',
         {
           allowWithDecorator: true,
+          allowConstructorOnly: true,
         },
       ],
       '@typescript-eslint/no-unsafe-call': 'off',

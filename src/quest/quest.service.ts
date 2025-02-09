@@ -11,7 +11,6 @@ import { Prisma, QuestStatus } from '@prisma/client';
 import { AuthAccessPayload } from '@lib/types/auth';
 import { createAppException } from '@lib/utils/exception';
 import { PrismaService } from '@src/database/prisma.service';
-import { UserService } from '@src/user/user.service';
 
 import {
   ChangeQuestVisibilityDto,
@@ -37,18 +36,47 @@ export const QuestTitleAlreadyTakenException = createAppException(
 export class QuestService {
   private readonly logger = new Logger(QuestService.name);
 
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async getList(params: GetQuestListParamsDto): Promise<QuestListResponseDto> {
+  async getListGallery(
+    params: GetQuestListParamsDto,
+  ): Promise<QuestListResponseDto> {
     const where: Prisma.QuestWhereInput = {
       title: {
         contains: params.title,
         mode: 'insensitive',
       },
       status: QuestStatus.PUBLISHED,
+    };
+    const [data, total] = await Promise.all([
+      this.prismaService.quest.findMany({
+        where,
+        take: params.pageSize,
+        skip: (params.page - 1) * params.pageSize,
+        orderBy: { [params.sortColumn]: params.sortOrder },
+        include: {
+          author: true,
+        },
+      }),
+      this.prismaService.quest.count({ where }),
+    ]);
+    return {
+      meta: { total },
+      data,
+    };
+  }
+
+  async getListAuthored(
+    params: GetQuestListParamsDto,
+    access: AuthAccessPayload,
+  ): Promise<QuestListResponseDto> {
+    const where: Prisma.QuestWhereInput = {
+      authorId: access.sub,
+      title: {
+        contains: params.title,
+        mode: 'insensitive',
+      },
+      status: params.status,
     };
     const [data, total] = await Promise.all([
       this.prismaService.quest.findMany({
@@ -88,7 +116,6 @@ export class QuestService {
     data: CreateQuestDataDto,
     access: AuthAccessPayload,
   ): Promise<QuestResponseDto> {
-    const author = await this.userService.get(access.sub);
     const quest = await this.prismaService.quest
       .create({
         data: {
@@ -96,7 +123,7 @@ export class QuestService {
           description: data.description,
           difficulty: data.difficulty,
           author: {
-            connect: { id: author.id },
+            connect: { id: access.sub },
           },
         },
         include: {

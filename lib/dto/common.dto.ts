@@ -25,18 +25,20 @@ export abstract class PageableDto {
   sortOrder: Prisma.SortOrder;
 }
 
+export class ResponseDto {
+  constructor(data: Partial<ResponseDto>) {
+    Object.assign(this, data);
+  }
+}
+
 class ListResponseMetaDto {
   @ApiProperty({ description: 'Total count' })
   total: number;
 }
 
-export abstract class ListResponseDto<T> {
+export abstract class ListResponseDto<T> extends ResponseDto {
   abstract data: T[];
 
   @ApiProperty({ type: ListResponseMetaDto })
   meta: ListResponseMetaDto;
-
-  constructor(partia: Partial<ListResponseDto<T>>) {
-    Object.assign(this, partia);
-  }
 }

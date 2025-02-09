@@ -66,8 +66,10 @@ model Quest {
   updatedAt     DateTime        @default(now()) @updatedAt @map("updated_at")
   createdAt     DateTime        @default(now()) @map("created_at")
 
-  reviews  QuestReview[]
-  attempts QuestAttempt[]
+  reviews      QuestReview[]
+  attempts     QuestAttempt[]
+  scenes       QuestScene[]
+  interactions QuestInteraction[]
 
   @@map("quests")
 }
@@ -105,4 +107,73 @@ model QuestAttempt {
   createdAt DateTime           @default(now()) @map("created_at")
 
   @@map("quest_attempts")
+}
+
+model QuestScene {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  questId   String   @map("quest_id") @db.VarChar(36)
+  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  label     String   @db.VarChar(64)
+  isMain    Boolean  @default(false) @map("is_main")
+  width     Int      @default(0)
+  height    Int      @default(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  interactions QuestInteraction[]
+  transitions  SceneTansition[]
+
+  @@map("quest_scenes")
+}
+
+enum QuestInteractionType {
+  QUESTION
+  TRANSITION
+
+  @@map("quest_task_type")
+}
+
+model QuestInteraction {
+  id           String               @id @default(uuid()) @db.VarChar(36)
+  questId      String               @map("quest_id") @db.VarChar(36)
+  quest        Quest                @relation(fields: [questId], references: [id], onDelete: Cascade)
+  questSceneId String               @map("quest_scene_id") @db.VarChar(36)
+  questScene   QuestScene           @relation(fields: [questSceneId], references: [id], onDelete: Cascade)
+  type         QuestInteractionType
+  penalty      Int                  @default(0)
+  dx           Float
+  dy           Float
+  radius       Int
+  label        String?              @db.VarChar(64)
+  template     String?              @db.VarChar(64)
+  settings     String?              @db.Text
+  answers      String?              @db.Text
+  updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at")
+  createdAt    DateTime             @default(now()) @map("created_at")
+
+  transitions  SceneTansition[]
+  dependants   InteractionLock[] @relation("interaction_dependants")
+  dependencies InteractionLock[] @relation("interaction_dependencies")
+
+  @@map("quest_interactions")
+}
+
+model SceneTansition {
+  interactionId String           @map("interaction_id") @db.VarChar(36)
+  interaction   QuestInteraction @relation(fields: [interactionId], references: [id], onDelete: Cascade)
+  sceneId       String           @map("scene_id") @db.VarChar(36)
+  scene         QuestScene       @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@id([interactionId, sceneId])
+  @@map("scene_transitions")
+}
+
+model InteractionLock {
+  dependantId  String           @map("dependant_id") @db.VarChar(36)
+  dependant    QuestInteraction @relation("interaction_dependants", fields: [dependantId], references: [id], onDelete: Cascade)
+  dependencyId String           @map("dependency_id") @db.VarChar(36)
+  dependency   QuestInteraction @relation("interaction_dependencies", fields: [dependencyId], references: [id], onDelete: Cascade)
+
+  @@id([dependantId, dependencyId])
+  @@map("interaction_locks")
 }
