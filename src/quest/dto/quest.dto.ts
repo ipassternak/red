@@ -1,15 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { QuestDifficulty, QuestStatus } from '@prisma/client';
+import { JsonValue } from '@prisma/client/runtime/library';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsNotEmptyObject,
   IsOptional,
   IsString,
   Length,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
 
 import { ListResponseDto, PageableDto, ResponseDto } from '@lib/dto/common.dto';
+import { FileDataDto } from '@src/files/dto/files.dto';
 import { UserResponseDto } from '@src/user/dto/user.dto';
 
 // Requests
@@ -37,13 +41,13 @@ export class GetQuestListParamsDto extends PageableDto {
   title?: string;
 
   @ApiProperty({
+    required: false,
     description: 'Status of the quest',
     enum: QuestStatus,
-    default: QuestStatus.PUBLISHED,
   })
   @IsEnum(QuestStatus)
   @IsOptional()
-  status: QuestStatus = QuestStatus.PUBLISHED;
+  status: QuestStatus;
 
   @ApiProperty({
     description: 'Sort column',
@@ -73,6 +77,16 @@ export class CreateQuestDataDto {
   @IsString()
   @Length(1, 4000)
   description: string;
+
+  @ApiProperty({
+    type: FileDataDto,
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => FileDataDto)
+  thumbnail: FileDataDto;
 
   @ApiProperty({
     description: 'Time limit to complete the quest in minutes',
@@ -107,6 +121,10 @@ export class QuestResponseDto extends ResponseDto {
 
   @ApiProperty({ description: 'Description of the quest' })
   description: string;
+
+  @ApiProperty({ type: FileDataDto, required: false })
+  @Type(() => FileDataDto)
+  thumbnail?: JsonValue;
 
   @ApiProperty({
     description: 'Current status of the quest',

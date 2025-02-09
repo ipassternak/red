@@ -12,6 +12,7 @@ model User {
   oid       String    @unique @db.VarChar(255)
   email     String    @unique @db.VarChar(64)
   fullName  String    @map("full_name") @db.VarChar(255)
+  avatar    Json?     @db.Json
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   createdAt DateTime  @default(now()) @map("created_at")
   sessions  Session[]
@@ -63,6 +64,7 @@ model Quest {
   totalSolved   Int             @default(0) @map("total_solved")
   avgSolvedTime Float           @default(0) @map("avg_solved_time")
   avgRating     Float           @default(0) @map("avg_rating")
+  thumbnail     Json?           @db.Json
   updatedAt     DateTime        @default(now()) @updatedAt @map("updated_at")
   createdAt     DateTime        @default(now()) @map("created_at")
 
@@ -110,15 +112,16 @@ model QuestAttempt {
 }
 
 model QuestScene {
-  id        String   @id @default(uuid()) @db.VarChar(36)
-  questId   String   @map("quest_id") @db.VarChar(36)
-  quest     Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
-  label     String   @db.VarChar(64)
-  isMain    Boolean  @default(false) @map("is_main")
-  width     Int      @default(0)
-  height    Int      @default(0)
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  questId    String   @map("quest_id") @db.VarChar(36)
+  quest      Quest    @relation(fields: [questId], references: [id], onDelete: Cascade)
+  label      String   @db.VarChar(64)
+  isMain     Boolean  @default(false) @map("is_main")
+  width      Int      @default(0)
+  height     Int      @default(0)
+  background Json     @db.Json
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt  DateTime @default(now()) @map("created_at")
 
   interactions QuestInteraction[]
   transitions  SceneTansition[]
@@ -147,7 +150,7 @@ model QuestInteraction {
   label        String?              @db.VarChar(64)
   template     String?              @db.VarChar(64)
   settings     String?              @db.Text
-  answers      String?              @db.Text
+  answers      Json?                @db.Json
   updatedAt    DateTime             @default(now()) @updatedAt @map("updated_at")
   createdAt    DateTime             @default(now()) @map("created_at")
 

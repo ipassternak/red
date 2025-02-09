@@ -45,5 +45,16 @@
   },
   "scheduler": {
     "authCleanupSessions": "0 0 * * *"
+  },
+  "files": {
+    "endPoint": "minio",
+    "port": 9000,
+    "useSSL": false,
+    "bucketName": "red",
+    "publicFolder": "/public",
+    "uploadLimits": {
+      "fileSize": 104857600,
+      "filesCount": 1
+    }
   }
 }

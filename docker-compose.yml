@@ -25,6 +25,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: red_minio
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=toortoor
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio:/data
+    command: server --console-address ":9001" /data
       
   app:
     container_name: red_app
@@ -49,3 +62,6 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
+
+volumes:
+  minio:

@@ -122,6 +122,7 @@ export class QuestService {
           title: data.title,
           description: data.description,
           difficulty: data.difficulty,
+          thumbnail: data.thumbnail,
           author: {
             connect: { id: access.sub },
           },

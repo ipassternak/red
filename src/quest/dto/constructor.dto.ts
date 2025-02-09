@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { QuestInteractionType } from '@prisma/client';
+import { JsonValue } from '@prisma/client/runtime/library';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import {
   ArrayMinSize,
@@ -8,6 +9,7 @@ import {
   IsInt,
   IsJSON,
   IsNotEmpty,
+  IsNotEmptyObject,
   IsNumber,
   IsOptional,
   IsPositive,
@@ -19,6 +21,7 @@ import {
 } from 'class-validator';
 
 import { ListResponseDto, ResponseDto } from '@lib/dto/common.dto';
+import { FileDataDto } from '@src/files/dto/files.dto';
 
 // Requests
 export class CreateSceneDataDto {
@@ -46,6 +49,14 @@ export class CreateSceneDataDto {
   @IsInt()
   @IsPositive()
   height: number;
+
+  @ApiProperty({
+    type: FileDataDto,
+  })
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => FileDataDto)
+  background: FileDataDto;
 }
 
 export class UpdateSceneDataDto {
@@ -79,6 +90,16 @@ export class UpdateSceneDataDto {
   @IsInt()
   @IsPositive()
   height?: number;
+
+  @ApiProperty({
+    type: FileDataDto,
+    required: false,
+  })
+  @IsOptional()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => FileDataDto)
+  background?: FileDataDto;
 }
 
 export class QuestionInteractionDataDto {
@@ -315,6 +336,10 @@ export class SceneResponseDto extends ResponseDto {
   @ApiProperty({ description: 'The height of the scene in pixels' })
   height: number;
 
+  @ApiProperty({ type: FileDataDto })
+  @Type(() => FileDataDto)
+  background: JsonValue;
+
   @ApiProperty({ description: 'The last update date of the scene' })
   updatedAt: Date;
 
@@ -386,7 +411,7 @@ export class InteractionResponseDto extends ResponseDto {
   settings: string | null;
 
   @Exclude()
-  answers: string | null;
+  answers: JsonValue | null;
 
   @ApiProperty({ description: 'The last update date of the interaction' })
   updatedAt: Date;
@@ -402,7 +427,7 @@ export class InteractionResponseDto extends ResponseDto {
       return {
         template: obj.template,
         settings: obj.settings,
-        answers: <string[]>JSON.parse(<string>(<unknown>obj.answers ?? '[]')),
+        answers: obj.answers,
       };
   })
   question?: QuestionInteractionDataDto;

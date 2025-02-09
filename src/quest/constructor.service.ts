@@ -172,6 +172,7 @@ export class ConstructorService {
         label: data.label,
         width: data.width,
         height: data.height,
+        background: data.background,
         isMain: scenesCount === 0,
         quest: {
           connect: {
@@ -201,6 +202,7 @@ export class ConstructorService {
           label: data.label,
           width: data.width,
           height: data.height,
+          background: data.background,
         },
       })
       .catch((error: unknown): never => {

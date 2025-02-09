@@ -14,6 +14,7 @@ import { AppConfigDto } from 'config/app.dto';
 
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
+import { FilesModule } from './files/files.module';
 import { HealthModule } from './health/health.module';
 import { QuestModule } from './quest/quest.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
@@ -49,6 +50,7 @@ import { UserModule } from './user/user.module';
     AuthModule,
     UserModule,
     QuestModule,
+    FilesModule,
   ],
   controllers: [],
   providers: [],
