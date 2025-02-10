@@ -33,8 +33,8 @@ services:
       - "traefik.http.routers.web.entrypoints=websecure"
       - "traefik.http.routers.web.tls.certresolver=myresolver"
       - "traefik.http.routers.web.middlewares=ratelimit"
-      - "traefik.http.middlewares.ratelimit.rateLimit.average=5"
-      - "traefik.http.middlewares.ratelimit.rateLimit.burst=10"
+      - "traefik.http.middlewares.ratelimit.rateLimit.average=100"
+      - "traefik.http.middlewares.ratelimit.rateLimit.burst=200"
     environment:
       - PORT=8080
     configs:
