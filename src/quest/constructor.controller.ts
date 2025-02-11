@@ -34,8 +34,10 @@ import {
   SceneListResponseDto,
   SceneWithMetadataResponseDto,
   UpdateInteractionDataDto,
+  UpdateQuestDataDto,
   UpdateSceneDataDto,
 } from './dto/constructor.dto';
+import { QuestResponseDto } from './dto/quest.dto';
 
 @UseGuards(JwtAccessGuard)
 @UseInterceptors(ClassSerializerInterceptor)
@@ -44,6 +46,23 @@ import {
 @ApiTags('Quest Constructor')
 export class ConstructorController {
   constructor(private readonly constructorService: ConstructorService) {}
+
+  @Put('/:questId')
+  @ApiOperation({ description: 'Update quest' })
+  @SerializeOptions({ type: QuestResponseDto })
+  @ApiOkResponse({ type: QuestResponseDto })
+  async updateQuest(
+    @Param('questId') questId: string,
+    @Body() data: UpdateQuestDataDto,
+    @Req() request: { accessPayload: AuthAccessPayload },
+  ): Promise<QuestResponseDto> {
+    const { accessPayload } = request;
+    return await this.constructorService.updateQuest(
+      questId,
+      data,
+      accessPayload,
+    );
+  }
 
   @Get('/:questId/metadata')
   @ApiOperation({ description: 'Get quest constructor metadata' })

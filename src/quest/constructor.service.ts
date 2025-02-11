@@ -33,8 +33,10 @@ import {
   SceneWithMetadataResponseDto,
   TransitionInteractionDataDto,
   UpdateInteractionDataDto,
+  UpdateQuestDataDto,
   UpdateSceneDataDto,
 } from './dto/constructor.dto';
+import { QuestResponseDto } from './dto/quest.dto';
 import { QuestAccessForbiddenException } from './quest.service';
 
 const QuestCannotBeConstructedException = createAppException(
@@ -68,6 +70,49 @@ export class ConstructorService {
       throw new QuestAccessForbiddenException();
     if (status && quest.status !== status)
       throw new QuestCannotBeConstructedException();
+    return quest;
+  }
+
+  async updateQuest(
+    questId: string,
+    data: UpdateQuestDataDto,
+    access: AuthAccessPayload,
+  ): Promise<QuestResponseDto> {
+    await this.checkQuestAccess(questId, access, QuestStatus.UNPUBLISHED);
+    const maxTimeLimit = this.configService.get(
+      'questConstructor.maxTimeLimit',
+      {
+        infer: true,
+      },
+    );
+    if (data.timeLimit !== undefined && data.timeLimit > maxTimeLimit)
+      throw new BadRequestException('Time limit exceeds the maximum value');
+    const quest = await this.prismaService.quest
+      .update({
+        where: { id: questId },
+        data: {
+          title: data.title,
+          description: data.description,
+          difficulty: data.difficulty,
+          timeLimit: data.timeLimit,
+          thumbnail: data.thumbnail,
+        },
+        include: {
+          author: true,
+        },
+      })
+      .catch((error: unknown): never => {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === 'P2025')
+            throw new NotFoundException('Quest not found');
+        }
+        this.logger.fatal({
+          service: `${ConstructorService.name}.updateQuest`,
+          error,
+          context: { questId },
+        });
+        throw new InternalServerErrorException();
+      });
     return quest;
   }
 

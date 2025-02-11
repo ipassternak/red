@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { QuestInteractionType } from '@prisma/client';
+import { QuestDifficulty, QuestInteractionType } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import {
@@ -24,6 +24,59 @@ import { ListResponseDto, ResponseDto } from '@lib/dto/common.dto';
 import { FileDataDto } from '@src/files/dto/files.dto';
 
 // Requests
+export class UpdateQuestDataDto {
+  @ApiProperty({
+    required: false,
+    description: 'The title of the quest',
+    minLength: 1,
+    maxLength: 64,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 64)
+  title?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The description of the quest',
+    minLength: 1,
+  })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  description?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'The difficulty of the quest',
+    enum: QuestDifficulty,
+  })
+  @IsOptional()
+  @IsEnum(QuestDifficulty)
+  difficulty?: QuestDifficulty;
+
+  @ApiProperty({
+    required: false,
+    description: 'The time limit of the quest in seconds',
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  timeLimit?: number;
+
+  @ApiProperty({
+    required: false,
+    description: 'The thumbnail of the quest',
+    type: FileDataDto,
+  })
+  @IsOptional()
+  @IsNotEmptyObject()
+  @ValidateNested()
+  @Type(() => FileDataDto)
+  thumbnail?: FileDataDto;
+}
+
 export class CreateSceneDataDto {
   @ApiProperty({
     description: 'The label of the scene',
